@@ -1,0 +1,5 @@
+## Basic build command ##
+dmd mediainfo.d c/mediainfo.d -lib -of../libmediainfod.a
+
+## Available version switches ##
+MediaInfo_UTF16

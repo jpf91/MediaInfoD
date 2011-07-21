@@ -1,0 +1,4 @@
+## Basic build commands ##
+dmd get-options.d -L-lmediainfod -L-lmediainfo -L-L../ -I../src
+dmd example1.d -L-lmediainfod -L-lmediainfo -L-L../ -I../src
+dmd example2.d -L-lmediainfod -L-lmediainfo -L-L../ -I../src

@@ -1,0 +1,13 @@
+#Ignore built library
+libmediainfod.a
+
+#Ignore object files
+*.o
+
+#Ignore example binaries
+example/example1
+example/example2
+example/get-options
+
+#Ignore generated html docs
+doc/generated/*.html
