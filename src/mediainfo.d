@@ -10,6 +10,7 @@ module mediainfo;
 
 import std.string;
 import std.conv;
+import std.typecons;
 import c.mediainfo;
 
 ///alias for MediaInfo_stream_C
@@ -30,37 +31,33 @@ public class MediaInfoException : Exception
 public struct MediaInfo
 {
     private:
-        struct Impl
+        struct Payload
         {
-            void* handle;
-            uint refs = uint.max / 2;
-            this(void* h, uint r)
+            void* _payload;
+            this(void* h)
             {
-                handle = h;
-                refs = r;
+                _payload = h;
             }
-        }
-        Impl* p;
-        bool disposed = false;
+            ~this()
+            {
+                if(_payload)
+                {
+                    MediaInfoA_Delete(_payload);
+                    _payload = null;
+                }
+            }
     
-        void close_refc()
-        {
-            if (!p) return; // succeed vacuously
-            if (!p.handle)
-            {
-                p = null; // start a new life
-                return;
-            }
-
-            MediaInfoA_Delete(p.handle);
-            p.handle = null; // nullify the handle anyway
-            --p.refs;
-            p = null;
+            // Should never perform these operations
+            this(this) { assert(false); }
+            void opAssign(MediaInfo.Payload rhs) { assert(false); }
         }
+    
+        alias RefCounted!(Payload, RefCountedAutoInitialize.no) Data;
+        Data _data;
 
         @property void* handle()
         {
-            return p.handle;
+            return _data._payload;
         }
     
     public:
@@ -68,31 +65,8 @@ public struct MediaInfo
         {
             MediaInfo info;
             auto h = MediaInfoA_New();
-            info.p = new Impl(h, 1);
+            info._data.RefCounted.initialize(h);
             return info;
-        }
-
-        ~this()
-        {
-            if(!disposed)
-            {
-                if (!p) return;
-                if (p.refs == 1) close_refc();
-                else --p.refs;
-            }
-        }
-        
-        this(this)
-        {
-            if (!p) return;
-            assert(p.refs);
-            ++p.refs;
-            disposed = false;
-        }
-
-        void opAssign(MediaInfo rhs)
-        {
-            p = rhs.p;
         }
         
         /**
@@ -379,18 +353,5 @@ public struct MediaInfo
         size_t getCount(Stream streamKind, size_t streamNumber = -1)
         {
             return MediaInfoA_Count_Get(handle, streamKind, streamNumber);
-        }
-
-        ///Explicitly destroy this reference
-        void dispose()
-        {
-            if(!disposed)
-            {
-                if (!p) return;
-                if (p.refs == 1) close_refc();
-                else --p.refs;
-
-                disposed = true;
-            }
         }
 }
