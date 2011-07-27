@@ -29,7 +29,7 @@ int main(string[] args)
     {
         writefln("Video track %s:", i);
         writefln("  Resolution: %s x %s", info.get(Stream.Video, i, "Width"),
-            info.get(Stream.Video, 0, "Height"));
+            info.get(Stream.Video, i, "Height"));
         writefln("  FPS: %s", info.get(Stream.Video, i, "FrameRate"));
         writefln("  Duration: %s", info.get(Stream.Video, i, "Duration/String"));
         string brate = info.get(Stream.Video, i, "BitRate");
